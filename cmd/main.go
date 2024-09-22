@@ -23,30 +23,6 @@ func drawText(s tcell.Screen, x1, y1, x2, y2 int, style tcell.Style, text string
 	}
 }
 
-type Point struct {
-	x int
-	y int
-}
-
-// empty -> head: 0
-type Snake struct {
-	next int // pointer to add next element, init to 0
-	tail int // oldest element added, default to -1
-	s    []Point
-}
-
-func MakeSnake(l int) Snake {
-	return Snake{0, -1, make([]Point, 0)}
-}
-
-func (s Snake) Len() int {
-	return s.tail - s.next + 1
-}
-
-func (s Snake) IsEmpty() bool {
-	return s.Len() > 0
-}
-
 func main() {
 	defStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
 	boxStyle := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorPurple)
@@ -93,7 +69,7 @@ func main() {
 
 	ticker := time.NewTicker(500 * time.Millisecond)
 	done := make(chan bool)
-	key_pressed := make(chan bool)
+	// key_pressed := make(chan bool)
 
 	// ?? lock!
 	x, y := 20, 20
@@ -116,25 +92,25 @@ func main() {
 					left = false
 					up = false
 					down = false
-					key_pressed <- true
+					// key_pressed <- true
 				} else if ev.Key() == tcell.KeyLeft {
 					right = false
 					left = true
 					up = false
 					down = false
-					key_pressed <- true
+					// key_pressed <- true
 				} else if ev.Key() == tcell.KeyUp {
 					right = false
 					left = false
 					up = true
 					down = false
-					key_pressed <- true
+					// key_pressed <- true
 				} else if ev.Key() == tcell.KeyDown {
 					right = false
 					left = false
 					up = false
 					down = true
-					key_pressed <- true
+					// key_pressed <- true
 				}
 			}
 		}
@@ -145,8 +121,7 @@ func main() {
 		select {
 		case <-done:
 			return
-		case <-key_pressed:
-			s.SetContent(x, y, ' ', nil, boxStyle)
+		case <-ticker.C:
 			if right {
 				if x < xmax {
 					x++
@@ -159,7 +134,6 @@ func main() {
 				} else {
 					x = xmax
 				}
-
 			} else if up {
 				if y > 0 {
 					y--
@@ -173,18 +147,8 @@ func main() {
 					y = 0
 				}
 			}
-		case <-ticker.C:
-			s.SetContent(x, y, ' ', nil, boxStyle)
-			if right {
-				x++
-			} else if left {
-				x--
-			} else if up {
-				y--
-			} else if down {
-				y++
-			}
 		}
+		s.SetContent(x, y, ' ', nil, boxStyle)
 		s.Show()
 	}
 }
