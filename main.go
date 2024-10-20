@@ -170,6 +170,9 @@ func main() {
 		}
 
 		s.SetContent(x, y, ' ', nil, boxStyle)
+		if snake.Len() > MAX_SIZE*2/3 {
+			panic("Snake is too long!")
+		}
 		snake.AddHead(Point{x, y})
 		s.SetContent(snake.Tail().x, snake.Tail().y, ' ', nil, defStyle)
 		if !add {

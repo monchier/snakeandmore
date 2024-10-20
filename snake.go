@@ -17,10 +17,23 @@ type Snake struct {
 }
 
 func MakeSnake() Snake {
-	return Snake{head: MAX_SIZE / 2, tail: MAX_SIZE / 2}
+	return Snake{head: 0, tail: 0}
+}
+
+func (s *Snake) relocate() {
+	t := [MAX_SIZE]Point{}
+	for i, j := s.tail, 0; i <= s.head; i, j = i+1, j+1 {
+		t[j] = s.v[i]
+	}
+	s.v = t
+	s.head = s.head - s.tail
+	s.tail = 0
 }
 
 func (s *Snake) AddHead(p Point) {
+	if s.head >= MAX_SIZE-1 {
+		s.relocate()
+	}
 	s.head++
 	s.v[s.head] = p
 }
