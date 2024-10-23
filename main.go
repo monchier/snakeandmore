@@ -81,6 +81,12 @@ func main() {
 	ygem := rand.IntN(ymax)
 	up, down, left, right := true, false, false, false
 	snake := MakeSnake()
+	snake.AddHead(Point{x, y})
+	s.SetContent(snake.Head().x, snake.Head().y, ' ', nil, boxStyle)
+
+	if snake.Len() > 1 {
+		panic("Snake should only have 1 element")
+	}
 	add := false
 
 	s.SetContent(xgem, ygem, ' ', nil, gemStyle)
@@ -169,11 +175,8 @@ func main() {
 			s.SetContent(xgem, ygem, ' ', nil, gemStyle)
 		}
 
-		s.SetContent(x, y, ' ', nil, boxStyle)
-		if snake.Len() > MAX_SIZE*2/3 {
-			panic("Snake is too long!")
-		}
 		snake.AddHead(Point{x, y})
+		s.SetContent(snake.Head().x, snake.Head().y, ' ', nil, boxStyle)
 		s.SetContent(snake.Tail().x, snake.Tail().y, ' ', nil, defStyle)
 		if !add {
 			snake.RemoveTail()
