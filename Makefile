@@ -1,2 +1,2 @@
 all:
-	go build -o snake
+	go build -o gosnake
