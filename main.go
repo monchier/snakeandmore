@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gosnake/game"
 	"log"
 	"math/rand/v2"
 	"time"
@@ -70,16 +71,21 @@ func main() {
 	// s.PostEvent(tcell.NewEventKey(tcell.KeyRune, rune('a'), 0))
 
 	ticker := time.NewTicker(500 * time.Millisecond)
+	tickerAuto := time.NewTicker(10 * time.Second)
 	// periodTicker := time.NewTicker(10 * time.Second)
 
 	done := make(chan bool)
 	// key_pressed := make(chan bool)
 
-	// ?? lock!
 	x, y := 20, 20
 	xgem := rand.IntN(xmax)
 	ygem := rand.IntN(ymax)
 	up, down, left, right := true, false, false, false
+	add := false
+	auto := false
+
+	g := game.NewGame(x, y, xmax, ymax, xgem, ygem)
+
 	snake := MakeSnake()
 	snake.AddHead(Point{x, y})
 	s.SetContent(snake.Head().x, snake.Head().y, ' ', nil, boxStyle)
@@ -87,9 +93,43 @@ func main() {
 	if snake.Len() > 1 {
 		panic("Snake should only have 1 element")
 	}
-	add := false
 
 	s.SetContent(xgem, ygem, ' ', nil, gemStyle)
+
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			case <-tickerAuto.C:
+				if auto {
+					toss := rand.IntN(4)
+					switch toss {
+					case 0:
+						right = true
+						left = false
+						up = false
+						down = false
+					case 1:
+						right = false
+						left = true
+						up = false
+						down = false
+					case 2:
+						right = false
+						left = false
+						up = true
+						down = false
+					case 3:
+						right = false
+						left = false
+						up = false
+						down = true
+					}
+				}
+			}
+		}
+	}()
 
 	go func() {
 		for {
@@ -105,6 +145,8 @@ func main() {
 					s.Clear()
 				} else if ev.Rune() == 'A' || ev.Rune() == 'a' {
 					add = true
+				} else if ev.Rune() == 'R' || ev.Rune() == 'r' {
+					auto = !auto
 				} else if ev.Key() == tcell.KeyRight {
 					right = true
 					left = false
@@ -141,41 +183,24 @@ func main() {
 			return
 		case <-ticker.C:
 			if right {
-				if x < xmax {
-					x++
-				} else {
-					x = 0
-				}
+				g.MoveRight()
 			} else if left {
-				if x > 0 {
-					x--
-				} else {
-					x = xmax
-				}
+				g.MoveLeft()
 			} else if up {
-				if y > 0 {
-					y--
-				} else {
-					y = ymax
-				}
+				g.MoveUp()
 			} else if down {
-				if y < ymax {
-					y++
-				} else {
-					y = 0
-				}
+				g.MoveDown()
 			}
 			// case <-periodTicker.C:
 		}
 
-		if xgem == x && ygem == y {
+		if g.HasReachedGem() {
 			add = true
-			xgem = rand.IntN(xmax)
-			ygem = rand.IntN(ymax)
-			s.SetContent(xgem, ygem, ' ', nil, gemStyle)
+			g.UpdateGem(rand.IntN(xmax), rand.IntN(ymax))
+			s.SetContent(g.GetGemX(), g.GetGemY(), ' ', nil, gemStyle)
 		}
 
-		snake.AddHead(Point{x, y})
+		snake.AddHead(Point{g.GetX(), g.GetY()})
 		s.SetContent(snake.Head().x, snake.Head().y, ' ', nil, boxStyle)
 		s.SetContent(snake.Tail().x, snake.Tail().y, ' ', nil, defStyle)
 		if !add {
