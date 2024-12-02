@@ -147,25 +147,25 @@ func main() {
 					add = true
 				} else if ev.Rune() == 'R' || ev.Rune() == 'r' {
 					auto = !auto
-				} else if ev.Key() == tcell.KeyRight {
+				} else if !auto && ev.Key() == tcell.KeyRight {
 					right = true
 					left = false
 					up = false
 					down = false
 					// key_pressed <- true
-				} else if ev.Key() == tcell.KeyLeft {
+				} else if !auto && ev.Key() == tcell.KeyLeft {
 					right = false
 					left = true
 					up = false
 					down = false
 					// key_pressed <- true
-				} else if ev.Key() == tcell.KeyUp {
+				} else if !auto && ev.Key() == tcell.KeyUp {
 					right = false
 					left = false
 					up = true
 					down = false
 					// key_pressed <- true
-				} else if ev.Key() == tcell.KeyDown {
+				} else if !auto && ev.Key() == tcell.KeyDown {
 					right = false
 					left = false
 					up = false
